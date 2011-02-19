@@ -3417,6 +3417,35 @@ _action_navigation_activate (GtkAction*     action,
     return FALSE;
 }
 
+static gboolean
+_action_navigation_activate_button2 (GtkAction*     action,
+                                     MidoriBrowser* browser)
+{
+    gchar* uri;
+    gint n;
+    const gchar* name;
+
+    g_assert (GTK_IS_ACTION (action));
+
+    if (g_object_get_data (G_OBJECT (action), "midori-middle-click"))
+    {
+        g_object_set_data (G_OBJECT (action), "midori-middle-click", (void*)0);
+        return FALSE;
+    }
+
+    name = gtk_action_get_name (action);
+
+    if (g_str_equal (name, "Homepage"))
+    {
+        g_object_get (browser->settings, "homepage", &uri, NULL);
+        n = midori_browser_add_uri (browser, uri);
+        midori_browser_set_current_page (browser, n);
+        g_free (uri);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void
 _action_location_activate (GtkAction*     action,
                            MidoriBrowser* browser)
@@ -6021,7 +6050,7 @@ midori_browser_toolbar_item_button_press_event_cb (GtkWidget*      toolitem,
         GtkAction* action = gtk_activatable_get_related_action (
             GTK_ACTIVATABLE (parent));
 
-        return _action_navigation_activate (action, browser);
+        return _action_navigation_activate_button2 (action, browser);
     }
     else if (event->button == 3)
     {
